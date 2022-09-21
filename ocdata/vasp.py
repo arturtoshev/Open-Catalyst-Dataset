@@ -14,6 +14,7 @@ import ase.io
 from ase.io.trajectory import TrajectoryWriter
 from ase.calculators.vasp import Vasp2
 from ase.calculators.singlepoint import SinglePointCalculator as SPC
+import pickle
 
 # NOTE: this is the setting for slab and adslab
 VASP_FLAGS = {'ibrion': 2,
@@ -182,6 +183,30 @@ def write_vasp_input_files(atoms, outdir='.', vasp_flags=None):
     atoms, vasp_flags = _clean_up_inputs(atoms, vasp_flags)
     calc = Vasp2(directory=outdir, **vasp_flags)
     calc.write_input(atoms)
+
+
+def write_pickle_input_files(atoms, outdir='.'):
+    '''
+    Writes atoms to a pickle files which we later use for ML-based relaxations.
+
+    Args:
+        atoms       `ase.Atoms` object that we want to relax.
+        outdir      A string indicating where you want to save the input files.
+                    Defaults to '.'
+        vasp_flags  A dictionary of settings we want to pass to the `Vasp2`
+                    calculator. Defaults to a standerd set of values if `None`
+    '''
+
+    atoms, _ = _clean_up_inputs(atoms, VASP_FLAGS.copy())
+    os.makedirs(outdir, exist_ok=True)
+    with open(outdir+"atoms.pkl", 'wb') as f:
+        # The next line is needed for compatibility with newer ASE versions.
+        # The reason is the deprecation of `atoms.cell.pbc` since version 3.20
+        # see relese notes https://wiki.fysik.dtu.dk/ase/releasenotes.html
+        atoms._pbc = atoms.pbc 
+
+        # save ase.Atoms object
+        pickle.dump(atoms, f)
 
 
 def xml_to_tuples(xml='vasprun.xml'):

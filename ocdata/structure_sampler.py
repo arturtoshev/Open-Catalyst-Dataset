@@ -1,5 +1,5 @@
 
-from ocdata.vasp import write_vasp_input_files
+from ocdata.vasp import write_vasp_input_files, write_pickle_input_files
 from ocdata.adsorbates import Adsorbate
 from ocdata.bulk_obj import Bulk
 from ocdata.surfaces import Surface
@@ -149,7 +149,10 @@ class StructureSampler():
         '''
         bulk_dict = surface.get_bulk_dict()
         bulk_dir = os.path.join(self.args.output_dir, output_name_template, 'surface')
-        write_vasp_input_files(bulk_dict['bulk_atomsobject'], bulk_dir)
+        if self.args.write_pickle:
+            write_pickle_input_files(bulk_dict['bulk_atomsobject'], bulk_dir)
+        else:
+            write_vasp_input_files(bulk_dict['bulk_atomsobject'], bulk_dir)
         self._write_metadata_pkl(bulk_dict, os.path.join(bulk_dir, 'metadata.pkl'))
         self.logger.info(f"wrote surface ({bulk_dict['bulk_samplingstr']}) to {bulk_dir}")
 
@@ -168,7 +171,10 @@ class StructureSampler():
             else:
                 adsorbed_bulk_dir = os.path.join(self.args.output_dir, output_name_template, 'adslab')
             adsorbed_bulk_dict = combined.get_adsorbed_bulk_dict(config_ind)
-            write_vasp_input_files(adsorbed_bulk_dict['adsorbed_bulk_atomsobject'], adsorbed_bulk_dir)
+            if self.args.write_pickle:
+                write_pickle_input_files(adsorbed_bulk_dict['adsorbed_bulk_atomsobject'], adsorbed_bulk_dir)
+            else:
+                write_vasp_input_files(adsorbed_bulk_dict['adsorbed_bulk_atomsobject'], adsorbed_bulk_dir)
             self._write_metadata_pkl(adsorbed_bulk_dict, os.path.join(adsorbed_bulk_dir, 'metadata.pkl'))
             if config_ind == 0:
                 self.logger.info(f"wrote adsorbed surface ({adsorbed_bulk_dict['adsorbed_bulk_samplingstr']}) to {adsorbed_bulk_dir}")

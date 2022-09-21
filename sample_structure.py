@@ -25,6 +25,9 @@ def parse_args():
 
     parser.add_argument('--verbose', action='store_true', default=False, help='Log detailed info')
 
+    # write adslabs to .pkl instead of vasp input files
+    parser.add_argument('--write_pickle', action='store_true', default=False, help='Used to save the ase.Atoms systems as .pkl files for ML-based relaxations instead of vasp-based relaxations.')
+    
     # check that all needed args are supplied
     args = parser.parse_args()
     if args.enumerate_all_structures:
