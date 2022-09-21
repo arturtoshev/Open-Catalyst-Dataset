@@ -153,7 +153,7 @@ class StructureSampler():
             write_pickle_input_files(bulk_dict['bulk_atomsobject'], bulk_dir)
         else:
             write_vasp_input_files(bulk_dict['bulk_atomsobject'], bulk_dir)
-        self._write_metadata_pkl(bulk_dict, os.path.join(bulk_dir, 'metadata.pkl'))
+        self._write_metadata_pkl(bulk_dict, bulk_dir)
         self.logger.info(f"wrote surface ({bulk_dict['bulk_samplingstr']}) to {bulk_dir}")
 
     def _write_adsorbed_surface(self, combined, output_name_template):
@@ -175,7 +175,7 @@ class StructureSampler():
                 write_pickle_input_files(adsorbed_bulk_dict['adsorbed_bulk_atomsobject'], adsorbed_bulk_dir)
             else:
                 write_vasp_input_files(adsorbed_bulk_dict['adsorbed_bulk_atomsobject'], adsorbed_bulk_dir)
-            self._write_metadata_pkl(adsorbed_bulk_dict, os.path.join(adsorbed_bulk_dir, 'metadata.pkl'))
+            self._write_metadata_pkl(adsorbed_bulk_dict, adsorbed_bulk_dir)
             if config_ind == 0:
                 self.logger.info(f"wrote adsorbed surface ({adsorbed_bulk_dict['adsorbed_bulk_samplingstr']}) to {adsorbed_bulk_dir}")
 
@@ -187,7 +187,8 @@ class StructureSampler():
             dict_to_write: dict containing all info to dump as file
             path: output file path
         '''
+        os.makedirs(path, exist_ok=True)
         file_path = os.path.join(path, 'metadata.pkl')
-        with open(path, 'wb') as f:
+        with open(file_path, 'wb') as f:
             pickle.dump(dict_to_write, f)
 
