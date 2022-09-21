@@ -28,6 +28,12 @@ def parse_args():
     # write adslabs to .pkl instead of vasp input files
     parser.add_argument('--write_pickle', action='store_true', default=False, help='Used to save the ase.Atoms systems as .pkl files for ML-based relaxations instead of vasp-based relaxations.')
     
+    # sample structures from a specific split
+    parser.add_argument('--split', type=str, default='all', choices=['all', 'id', 'val_ood', 'test_ood'], 
+        help='specify a subset of ads/cat or use all by default.')
+    parser.add_argument('--splits_db', type=str, required=False, 
+        help='File containing a dict with keys [id_ads, id_cat, val_ood_ads, val_ood_cat, test_ood_ads, test_ood_cat], and values being sets')
+
     # check that all needed args are supplied
     args = parser.parse_args()
     if args.enumerate_all_structures:

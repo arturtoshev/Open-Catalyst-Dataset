@@ -90,7 +90,22 @@ class StructureSampler():
             for ind in self.bulk_indices_list:
                 self.all_bulks.append(Bulk(bulk_db_lookup, self.args.precomputed_structures, ind))
         else:
-            self.all_bulks.append(Bulk(bulk_db_lookup, self.args.precomputed_structures))
+            # applies random sampling and returns one bulk or a list of bulks if all surfaces wanted
+            sample = Bulk(bulk_db_lookup, self.args.precomputed_structures)
+
+            # if sampling from a subset (split) is applied, then we iterate until a sample belongs to the split
+            if self.args.split != 'all':
+                with open(self.args.splits_db, 'rb') as f:
+                    splits_db_lookup = pickle.load(f)
+                allowed = splits_db_lookup[self.args.split + '_cat']
+
+                count = 0
+                while sample.mpid not in allowed:
+                    sample = Bulk(bulk_db_lookup, self.args.precomputed_structures)
+                    count += 1
+                    assert count < 1000, RuntimeError('Bulk sampling from a split unsuccessful after 1000 tries')
+
+            self.all_bulks.append(sample)
 
     def _load_and_write_surfaces(self):
         '''
@@ -115,7 +130,23 @@ class StructureSampler():
             else:
                 surface_info_index = np.random.choice(len(possible_surfaces))
                 surface = Surface(bulk, possible_surfaces[surface_info_index], surface_info_index, len(possible_surfaces))
-                self.adsorbate = Adsorbate(self.args.adsorbate_db)
+                
+                # applies random sampling and returns one adsorbate
+                sample = Adsorbate(self.args.adsorbate_db)
+                
+                # if sampling from a subset (split) is applied, then we iterate until a sample belongs to the split
+                if self.args.split != 'all':
+                    with open(self.args.splits_db, 'rb') as f:
+                        splits_db_lookup = pickle.load(f)
+                    allowed = splits_db_lookup[self.args.split + '_ads']
+
+                    count = 0
+                    while sample.smiles not in allowed:
+                        sample = Adsorbate(self.args.adsorbate_db)
+                        count += 1
+                        assert count < 1000, RuntimeError('Adsorbate sampling from a split unsuccessful after 1000 tries')
+
+                self.adsorbate = sample
                 self._combine_and_write(surface)
 
 
